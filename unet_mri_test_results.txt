@@ -1,0 +1,1 @@
+Average Dice Score: 0.9325 ± 0.0011
