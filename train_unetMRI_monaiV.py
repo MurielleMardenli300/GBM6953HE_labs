@@ -29,21 +29,48 @@ from sklearn.model_selection import KFold
 
 
 
-def get_tissue_ids(labels_file_path):
-    gm_ids, wm_ids = [], []
-    with open(labels_file_path, 'r') as f:
-        for line in f:
-            parts = line.split()
-            if not parts or not parts[0].isdigit():
-                continue
-            label_id, label_name = int(parts[0]), parts[1].lower()
-            if any(x in label_name for x in ['cortex', 'thalamus', 'caudate', 'putamen', 'pallidum', 'hippocampus', 'amygdala', 'accumbens']):
-                gm_ids.append(label_id)
-            elif "white-matter" in label_name:
-                wm_ids.append(label_id)
-    print(f"Found GM IDs: {gm_ids}")
-    print(f"Found WM IDs: {wm_ids}")
-    return gm_ids, wm_ids
+def get_tissue_ids(labels_file_path, type="WGM"):
+    """ Get tissue Ids.
+    Args:
+        labels_file_path (str): Path to the labels text file.
+        type (str): Type of tissue IDs to extract. Options are "WGM" for white and gray matter, 
+                    "4labels" for Cortex, Subcortical GM structures, WM, CSF
+        Returns:
+            if type=="WGM":
+                gm_ids (list): List of gray matter label IDs.
+                wm_ids (list): List of white matter label IDs.
+            elif type=="4labels":
+                list of the labels
+    """
+    if type == "WGM":
+        gm_ids, wm_ids = [], []
+        with open(labels_file_path, 'r') as f:
+            for line in f:
+                parts = line.split()
+                if not parts or not parts[0].isdigit():
+                    continue
+                label_id, label_name = int(parts[0]), parts[1].lower()
+                if any(x in label_name for x in ['cortex', 'thalamus', 'caudate', 'putamen', 'pallidum', 'hippocampus', 'amygdala', 'accumbens']):
+                    gm_ids.append(label_id)
+                elif "white-matter" in label_name:
+                    wm_ids.append(label_id)
+        print(f"Found GM IDs: {gm_ids}")
+        print(f"Found WM IDs: {wm_ids}")
+        return gm_ids, wm_ids
+    
+    elif type == "4labels":
+        label_ids = []
+        with open(labels_file_path, 'r') as f:
+            for line in f:
+                parts = line.split()
+                if not parts or not parts[0].isdigit():
+                    continue
+                label_id = int(parts[0])
+                label_ids.append(label_id)
+        print(f"Found label IDs: {label_ids}")
+        return label_ids
+
+
 
 
 
@@ -71,17 +98,26 @@ class BrainMRIDataset(Dataset):
 
 
 class MergeSegLabels(MapTransform):
-    def __init__(self, keys, labels_file_path):
+    def __init__(self, keys, labels_file_path, type="WGM"):
         super().__init__(keys)
-        self.gm_ids, self.wm_ids = get_tissue_ids(labels_file_path)
+        if type == "WGM":
+            self.gm_ids, self.wm_ids = get_tissue_ids(labels_file_path, type=type)
+            self.ids = []
+        elif type == "4labels":
+            self.ids = get_tissue_ids(labels_file_path, type=type)
+    
 
     def __call__(self, data):
         d = dict(data)
         for key in self.keys:
             seg = d[key]
             new_seg = np.zeros_like(seg)
-            new_seg[np.isin(seg, self.gm_ids)] = 1
-            new_seg[np.isin(seg, self.wm_ids)] = 2
+            if hasattr(self, 'gm_ids') and hasattr(self, 'wm_ids'):
+                new_seg[np.isin(seg, self.gm_ids)] = 1
+                new_seg[np.isin(seg, self.wm_ids)] = 2
+            elif hasattr(self, 'ids'):
+                for i, label_id in enumerate(self.ids):
+                    new_seg[seg == label_id] = i
             d[key] = new_seg
         return d
 
@@ -144,12 +180,19 @@ class UNetModule(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.AdamW(self.parameters(), lr=self.learning_rate)
 
+type = "WGM"
 
-labels_file_path = "/home/boadem/Work/School/neurite_data/seg24_labels.txt"
+if type == "WGM":
+    num_classes = 3
+    labels_file_path = "/home/boadem/Work/School/neurite_data/seg24_labels.txt"
+elif type == "4labels":
+    num_classes = 5
+    labels_file_path = "/home/boadem/Work/School/neurite_data/seg4_labels.txt"
+
 
 train_transforms = Compose([
     AddChannelDim(keys=["image", "label"]),
-    MergeSegLabels(keys=["label"], labels_file_path=labels_file_path),
+    MergeSegLabels(keys=["label"], labels_file_path=labels_file_path, type=type),
     ResizeD(keys=["image", "label"], spatial_size=(128,128), mode=("bilinear", "nearest")),
     ScaleIntensityRanged(keys=["image"], a_min=0, a_max=255, b_min=0.0, b_max=1.0),
     RandFlipd(keys=["image", "label"], prob=0.3, spatial_axis=0),
@@ -161,7 +204,7 @@ train_transforms = Compose([
 
 val_transforms = Compose([
     AddChannelDim(keys=["image", "label"]),
-    MergeSegLabels(keys=["label"], labels_file_path=labels_file_path),
+    MergeSegLabels(keys=["label"], labels_file_path=labels_file_path, type=type),
     ResizeD(keys=["image", "label"], spatial_size=(128,128), mode=("bilinear", "nearest")),
     ScaleIntensityRanged(keys=["image"], a_min=0, a_max=255, b_min=0.0, b_max=1.0),
     EnsureTyped(keys=["image", "label"], dtype=(torch.float32, torch.int64)),
@@ -169,7 +212,7 @@ val_transforms = Compose([
 
 
 
-def train(data, save_dir, log_save_dir, n_epochs=60, patience=10):
+def train(data, save_dir, log_save_dir, num_classes, n_epochs=60, patience=10):
     os.makedirs(save_dir, exist_ok=True)
     os.makedirs(log_save_dir, exist_ok=True)
 
@@ -195,7 +238,7 @@ def train(data, save_dir, log_save_dir, n_epochs=60, patience=10):
         train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True, num_workers=4)
         val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False, num_workers=4)
 
-        model = UNetModule()
+        model = UNetModule(num_classes=num_classes,learning_rate=1e-4)
 
         early_stopping = pl.callbacks.EarlyStopping(monitor="val_dice", patience=patience, mode="max")
         logger = pl.loggers.TensorBoardLogger(log_save_dir, name=f"unet_fold_{fold+1}")
@@ -204,6 +247,7 @@ def train(data, save_dir, log_save_dir, n_epochs=60, patience=10):
             max_epochs=n_epochs,
             callbacks=[early_stopping],
             logger=logger,
+            log_every_n_steps=10,
             accelerator="auto",
             devices=1
         )
@@ -223,8 +267,9 @@ train_set = json.load(open("/home/boadem/Work/School/train_set_paths.json"))
 
 train(
     data=train_set,
-    save_dir="/home/boadem/Work/School/Unet_brain_mri_models_WGM",
-    log_save_dir="/home/boadem/Work/School/Unet_brain_mri_logs_WGM",
-    n_epochs=60,
+    save_dir=f"/home/boadem/Work/School/Unet_brain_mri_models_{type}",
+    log_save_dir=f"/home/boadem/Work/School/Unet_brain_mri_logs_{type}",
+    num_classes=num_classes,
+    n_epochs=100,
     patience=10
 )
