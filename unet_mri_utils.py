@@ -27,21 +27,47 @@ from sklearn.model_selection import KFold
 
 
 
-def get_tissue_ids(labels_file_path):
-    gm_ids, wm_ids = [], []
-    with open(labels_file_path, 'r') as f:
-        for line in f:
-            parts = line.split()
-            if not parts or not parts[0].isdigit():
-                continue
-            label_id, label_name = int(parts[0]), parts[1].lower()
-            if any(x in label_name for x in ['cortex', 'thalamus', 'caudate', 'putamen', 'pallidum', 'hippocampus', 'amygdala', 'accumbens']):
-                gm_ids.append(label_id)
-            elif "white-matter" in label_name:
-                wm_ids.append(label_id)
-    print(f"Found GM IDs: {gm_ids}")
-    print(f"Found WM IDs: {wm_ids}")
-    return gm_ids, wm_ids
+def get_tissue_ids(labels_file_path, type="WGM"):
+    """ Get tissue Ids.
+    Args:
+        labels_file_path (str): Path to the labels text file.
+        type (str): Type of tissue IDs to extract. Options are "WGM" for white and gray matter, 
+                    "4labels" for Cortex, Subcortical GM structures, WM, CSF
+        Returns:
+            if type=="WGM":
+                gm_ids (list): List of gray matter label IDs.
+                wm_ids (list): List of white matter label IDs.
+            elif type=="4labels":
+                list of the labels
+    """
+    if type == "WGM":
+        gm_ids, wm_ids = [], []
+        with open(labels_file_path, 'r') as f:
+            for line in f:
+                parts = line.split()
+                if not parts or not parts[0].isdigit():
+                    continue
+                label_id, label_name = int(parts[0]), parts[1].lower()
+                if any(x in label_name for x in ['cortex', 'thalamus', 'caudate', 'putamen', 'pallidum', 'hippocampus', 'amygdala', 'accumbens']):
+                    gm_ids.append(label_id)
+                elif "white-matter" in label_name:
+                    wm_ids.append(label_id)
+        print(f"Found GM IDs: {gm_ids}")
+        print(f"Found WM IDs: {wm_ids}")
+        return gm_ids, wm_ids
+    
+    elif type == "4labels":
+        label_ids = []
+        with open(labels_file_path, 'r') as f:
+            for line in f:
+                parts = line.split()
+                if not parts or not parts[0].isdigit():
+                    continue
+                label_id = int(parts[0])
+                label_ids.append(label_id)
+        print(f"Found label IDs: {label_ids}")
+        return label_ids
+
 
 
 
@@ -66,20 +92,27 @@ class BrainMRIDataset(Dataset):
             sample = self.transform(sample)
         return sample
 
-
-
 class MergeSegLabels(MapTransform):
-    def __init__(self, keys, labels_file_path):
+    def __init__(self, keys, labels_file_path, type="WGM"):
         super().__init__(keys)
-        self.gm_ids, self.wm_ids = get_tissue_ids(labels_file_path)
+        if type == "WGM":
+            self.gm_ids, self.wm_ids = get_tissue_ids(labels_file_path, type=type)
+            self.ids = []
+        elif type == "4labels":
+            self.ids = get_tissue_ids(labels_file_path, type=type)
+    
 
     def __call__(self, data):
         d = dict(data)
         for key in self.keys:
             seg = d[key]
             new_seg = np.zeros_like(seg)
-            new_seg[np.isin(seg, self.gm_ids)] = 1
-            new_seg[np.isin(seg, self.wm_ids)] = 2
+            if hasattr(self, 'gm_ids') and hasattr(self, 'wm_ids'):
+                new_seg[np.isin(seg, self.gm_ids)] = 1
+                new_seg[np.isin(seg, self.wm_ids)] = 2
+            elif hasattr(self, 'ids'):
+                for i, label_id in enumerate(self.ids):
+                    new_seg[seg == label_id] = i
             d[key] = new_seg
         return d
 
