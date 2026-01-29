@@ -58,7 +58,7 @@ test_dataset = BrainMRIDataset(
 
 test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False, num_workers=4)
 dice_scores = []
-dice_metric = DiceMetric(include_background=True, reduction="mean_batch")
+dice_metric = DiceMetric(include_background=False, reduction="mean_batch")
 
 all_batch_dice = []
 with torch.no_grad():
