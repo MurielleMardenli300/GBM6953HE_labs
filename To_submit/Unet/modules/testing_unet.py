@@ -31,10 +31,9 @@ model = UNetModule(
     num_classes=num_classes
 )
 
-best_model_path = f"/Unet/logs/Unet_brain_mri_models_{type}/best_model_fold_1.pth"
+ckpt_path = "/VoxelMorph_/trained_models/Vxm_brain_mri_models_3labels/best_vxm_fold_3.ckpt"
 
-state_dict = torch.load(best_model_path, map_location="cpu")
-model.load_state_dict(state_dict)
+model.load_from_checkpoint(ckpt_path)
 
 model.eval()
 
