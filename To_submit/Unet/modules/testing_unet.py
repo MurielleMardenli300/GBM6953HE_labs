@@ -1,11 +1,11 @@
 import torch
 import json
 import torch.nn.functional as F
-from unet_mri_utils import UNetModule  # your module
+from Unet.modules.unet_mri_utils import UNetModule  # your module
 from monai.metrics import DiceMetric, compute_hausdorff_distance
 import numpy as np
 
-from unet_mri_utils import BrainMRIDataset, MergeSegLabels, AddChannelDim
+from Unet.modules.unet_mri_utils import BrainMRIDataset, MergeSegLabels, AddChannelDim
 from monai.transforms import Compose, ResizeD, ScaleIntensityRanged, EnsureTyped
 from torch.utils.data import DataLoader
 
@@ -17,22 +17,21 @@ type = "4labels"
 
 if type == "WGM":
     num_classes = 3
-    labels_file_path = "/home/boadem/Work/School/neurite_data/seg24_labels.txt"
-    train_set_path = "/home/boadem/Work/School/train_set_paths.json"
-    test_set_path = "/home/boadem/Work/School/test_set_paths.json"
+    labels_file_path = "/neurite_data/seg24_labels.txt"
+    train_set_path = "train_set_paths.json"
+    test_set_path = "test_set_paths.json"
 elif type == "4labels":
     num_classes = 5
-    labels_file_path = "/home/boadem/Work/School/neurite_data/seg4_labels.txt"
-    train_set_path = "/home/boadem/Work/School/train_set_paths_4labels.json"
-    test_set_path = "/home/boadem/Work/School/test_set_paths_4labels.json"
+    labels_file_path = "/neurite_data/seg4_labels.txt"
+    train_set_path = "train_set_paths_4labels.json"
+    test_set_path = "test_set_paths_4labels.json"
     
 model = UNetModule(
     learning_rate=1e-4,
     num_classes=num_classes
 )
 
-# best_model_path = "/home/boadem/Work/School/Unet_brain_mri_models_WGM/best_model_fold_4.pth"
-best_model_path = f"/home/boadem/Work/School/Unet_brain_mri_models_{type}/best_model_fold_1.pth"
+best_model_path = f"/Unet/logs/Unet_brain_mri_models_{type}/best_model_fold_1.pth"
 
 state_dict = torch.load(best_model_path, map_location="cpu")
 model.load_state_dict(state_dict)
@@ -247,7 +246,7 @@ hd95_avg_total = np.nanmean(np.nanmean(hd95_vals, axis=1))
 hd95_std_total = np.nanstd(np.nanmean(hd95_vals, axis=1))
 
 
-with open("/home/boadem/Work/School/unet_mri_test_results.txt", "a") as f:
+with open("/Unet/unet_mri_test_results.txt", "a") as f:
     f.write(f"\n--- Multi-Otsu Results ({type}) ---\n")
     f.write(f"Overall Average Dice: {dice_avg_total:.4f} ± {dice_std_total:.4f}\n")
 
@@ -333,7 +332,7 @@ for i, score in enumerate(mean_dice_per_class):
 for i, score in enumerate(mean_hd95_per_class):
     print(f"Class {i+1} HD95: {score:.4f}")
 
-with open("/home/boadem/Work/School/unet_mri_test_results.txt", "a") as f:
+with open("/Unet/unet_mri_test_results.txt", "a") as f:
     f.write(f"\n--- Unet Results: {type} ---\n")
     f.write(
         f"Overall Average Dice: {overall_avg_dice:.4f} ± {overall_std_dice:.4f}\n"

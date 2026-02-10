@@ -24,10 +24,10 @@ from skimage.transform import warp
 
 
 device = torch.device("cuda")
-test_set = json.load(open("/home/boadem/Work/School/test_set_paths.json"))
+test_set = json.load(open("test_set_paths.json"))
 num_classes = 3
-labels_file_path = "/home/boadem/Work/School/neurite_data/seg24_labels.txt"
-ckpt_path = "/home/boadem/Work/School/Vxm_brain_mri_models_3labels/best_vxm_fold_3.ckpt"
+labels_file_path = "/neurite_data/seg24_labels.txt"
+ckpt_path = "/VoxelMorph_/trained_models/Vxm_brain_mri_models_3labels/best_vxm_fold_3.ckpt"
 
 model = utils.VoxelMorphModel.load_from_checkpoint(ckpt_path, image_shape=(128, 128))
 model.eval()
@@ -104,7 +104,7 @@ print(f"Overall Average Dice: {pre_overall_avg_dice:.4f} ± {pre_overall_std_dic
 for i, (m, s) in enumerate(zip(pre_mean_dice_per_class, pre_std_dice_per_class)):
     print(f"Class {i} Dice: {m:.4f} ± {s:.4f}")
 
-with open("/home/boadem/Work/School/vxm_mri_test_results.txt", "a") as f:
+with open("/VoxelMorph_/vxm_mri_test_results.txt", "a") as f:
     f.write(f"\n--- Result Type: Pre-registration ---\n")
     f.write(f"Overall Average Dice: {pre_overall_avg_dice:.4f} ± {pre_overall_std_dice:.4f}\n")
     
@@ -201,7 +201,7 @@ print(f"Overall Average Dice: {of_overall_avg_dice:.4f} ± {of_overall_std_dice:
 for i, (m, s) in enumerate(zip(of_mean_dice_per_class, of_std_dice_per_class)):
     print(f"Class {i} Dice: {m:.4f} ± {s:.4f}")
 
-with open("/home/boadem/Work/School/vxm_mri_test_results.txt", "a") as f:
+with open("/VoxelMorph_/vxm_mri_test_results.txt", "a") as f:
     # f.write(f"\n--- Result Type: Optical Flow Estimation ---\n")
     f.write(f"\n--- Result Type: Phase Cross Correlation ---\n")
 
@@ -294,7 +294,7 @@ print(f"Overall Average Dice: {overall_avg_dice:.4f} ± {overall_std_dice:.4f}")
 for i, (m, s) in enumerate(zip(mean_dice_per_class, std_dice_per_class)):
     print(f"Class {i} Dice: {m:.4f} ± {s:.4f}")
 
-with open("/home/boadem/Work/School/vxm_mri_test_results.txt", "a") as f:
+with open("/VoxelMorph_/vxm_mri_test_results.txt", "a") as f:
     f.write(f"\n--- Result Type: VoxelMorph ---\n")
     f.write(f"Overall Average Dice: {overall_avg_dice:.4f} ± {overall_std_dice:.4f}\n")
     

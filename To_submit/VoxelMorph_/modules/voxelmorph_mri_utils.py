@@ -468,9 +468,9 @@ class BrainMRIDataset(Dataset) :
         self.return_2 = return_2 
 
         if num_classes == 3 : 
-            labels_file_path = "/home/boadem/Work/School/neurite_data/seg24_labels.txt"
+            labels_file_path = "/neurite_data/seg24_labels.txt"
         elif num_classes == 5 : 
-            labels_file_path = "/home/boadem/Work/School/neurite_data/seg4_labels.txt"
+            labels_file_path = "/neurite_data/seg4_labels.txt"
 
         if partition == "train" : 
             self.transform = Compose([

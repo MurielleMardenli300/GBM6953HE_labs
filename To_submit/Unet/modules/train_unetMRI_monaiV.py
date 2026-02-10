@@ -191,14 +191,14 @@ type = "WGM"
 
 if type == "WGM":
     num_classes = 3
-    labels_file_path = "/home/boadem/Work/School/neurite_data/seg24_labels.txt"
-    train_set_path = "/home/boadem/Work/School/train_set_paths.json"
-    test_set_path = "/home/boadem/Work/School/test_set_paths.json"
+    labels_file_path = "/neurite_data/seg24_labels.txt"
+    train_set_path = "train_set_paths.json"
+    test_set_path = "test_set_paths.json"
 elif type == "4labels":
     num_classes = 5
-    labels_file_path = "/home/boadem/Work/School/neurite_data/seg4_labels.txt"
-    train_set_path = "/home/boadem/Work/School/train_set_paths_4labels.json"
-    test_set_path = "/home/boadem/Work/School/test_set_paths_4labels.json"
+    labels_file_path = "/neurite_data/seg4_labels.txt"
+    train_set_path = "train_set_paths_4labels.json"
+    test_set_path = "test_set_paths_4labels.json"
 
 train_transforms = Compose([
     AddChannelDim(keys=["image", "label"]),
@@ -278,8 +278,8 @@ train_set = json.load(open(train_set_path))
 
 train(
     data=train_set,
-    save_dir=f"/home/boadem/Work/School/Unet_brain_mri_models_{type}",
-    log_save_dir=f"/home/boadem/Work/School/Unet_brain_mri_logs_{type}",
+    save_dir=f"/Unet/models_trained/Unet_brain_mri_models_{type}",
+    log_save_dir=f"/Unet/logs/Unet_brain_mri_logs_{type}",
     num_classes=num_classes,
     n_epochs=100,
     patience=10

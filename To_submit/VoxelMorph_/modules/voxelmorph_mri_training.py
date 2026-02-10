@@ -71,13 +71,13 @@ def train(data, save_dir, log_save_dir, num_classes, n_epochs=60, patience=10, b
     print("Training complete for all folds.")
 
 
-train_set = json.load(open("/home/boadem/Work/School/train_set_paths.json"))
+train_set = json.load(open("train_set_paths.json"))
 
 num_classes = 3
 train(
     data=train_set,
-    save_dir=f"/home/boadem/Work/School/Vxm_brain_mri_models_V2_{num_classes}labels",
-    log_save_dir=f"/home/boadem/Work/School/Vxm_brain_mri_logs_V2_{num_classes}labels",
+    save_dir=f"/VoxelMorph_/trained_models/Vxm_brain_mri_models_V2_{num_classes}labels",
+    log_save_dir=f"/VoxelMorph_/logs/Vxm_brain_mri_logs_V2_{num_classes}labels",
     num_classes=num_classes,
     n_epochs=100,
     patience=10
