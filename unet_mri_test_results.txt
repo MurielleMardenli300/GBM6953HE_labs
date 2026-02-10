@@ -1,1 +1,30 @@
-Average Dice Score: 0.9325 ± 0.0011
+Unet architecture used : (16, 32, 64, 128, 256)
+
+--- Multi-Otsu Results (4labels) ---
+Overall Average Dice: 0.5642 ± 0.0941
+Class 1 Dice: 0.6058 ± 0.0537
+Class 2 Dice: 0.3033 ± 0.0301
+Class 3 Dice: 0.8429 ± 0.0253
+Class 4 Dice: 0.5050 ± 0.3313
+
+Overall Average HD95: 18.4737 ± 3.4376
+Class 1 HD95: 11.0905 ± 2.0388
+Class 2 HD95: 34.6460 ± 1.6749
+Class 3 HD95: 2.0293 ± 0.6638
+Class 4 HD95: 26.1289 ± 13.0407
+------------------------------------------
+
+--- Unet Results: 4labels ---
+Overall Average Dice: 0.8434 ± 0.0643
+Overall Average HD95: 2.0205 ± 0.6302
+Class 1 Dice: 0.7606 ± 0.0335
+Class 2 Dice: 0.8961 ± 0.0253
+Class 3 Dice: 0.8803 ± 0.0079
+Class 4 Dice: 0.8365 ± 0.0610
+Class 1 HD95: 2.2365 ± 0.2985
+Class 2 HD95: 1.8121 ± 0.4048
+Class 3 HD95: 2.2832 ± 0.3129
+Class 4 HD95: 1.7502 ± 1.0030
+
+
+

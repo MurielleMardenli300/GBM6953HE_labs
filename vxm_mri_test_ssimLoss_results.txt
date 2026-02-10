@@ -1,0 +1,57 @@
+
+--- Result Type: Pre-registration ---
+Overall Average Dice: 0.5461 ± 0.1083
+Class 1 Dice: 0.4722 ± 0.0786
+Class 2 Dice: 0.6199 ± 0.0807
+---------------------------
+Overall SSIM : 0.5714 ± 0.0408
+Overall PSNR : 20.6841 ± 1.7398
+Overall NCC  : 0.1711 ± 0.0424
+
+--- Result Type: Optical Flow Estimation ---
+Overall Average Dice: 0.7886 ± 0.0877
+Class 1 Dice: 0.7388 ± 0.0830
+Class 2 Dice: 0.8383 ± 0.0605
+---------------------------
+Overall SSIM : 0.8812 ± 0.0698
+Overall PSNR : 30.1469 ± 4.2678
+Overall NCC  : 0.4798 ± 0.0833
+Overall folding R : 0.0033 ± 0.0033
+
+--- Result Type: VoxelMorph ---
+Overall Average Dice: 0.6909 ± 0.1279
+Class 1 Dice: 0.5979 ± 0.1095
+Class 2 Dice: 0.7839 ± 0.0602
+---------------------------
+Overall SSIM : 0.8378 ± 0.0524
+Overall PSNR : 26.8657 ± 2.6481
+Overall NCC  : 0.4350 ± 0.0547
+Overall folding R : 0.0135 ± 0.0125
+
+--- Result Type: Pre-registration ---
+Overall Average Dice: 0.5461 ± 0.1097
+Class 1 Dice: 0.4716 ± 0.0808
+Class 2 Dice: 0.6207 ± 0.0812
+---------------------------
+Overall SSIM : 0.5710 ± 0.0391
+Overall PSNR : 20.6894 ± 1.7185
+Overall NCC  : 0.1704 ± 0.0432
+
+--- Result Type: Pre-registration ---
+Overall Average Dice: 0.5465 ± 0.1101
+Class 1 Dice: 0.4715 ± 0.0810
+Class 2 Dice: 0.6216 ± 0.0812
+---------------------------
+Overall SSIM : 0.5725 ± 0.0394
+Overall PSNR : 20.7040 ± 1.7242
+Overall NCC  : 0.1709 ± 0.0430
+
+--- Result Type: VoxelMorph ---
+Overall Average Dice: 0.7517 ± 0.1002
+Class 1 Dice: 0.6893 ± 0.0955
+Class 2 Dice: 0.8140 ± 0.0580
+---------------------------
+Overall SSIM : 0.8837 ± 0.0480
+Overall PSNR : 29.8079 ± 2.8841
+Overall NCC  : 0.4763 ± 0.0549
+Overall folding R : 0.0051 ± 0.0060
