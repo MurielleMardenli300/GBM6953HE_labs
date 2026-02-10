@@ -265,9 +265,11 @@ def train(data, save_dir, log_save_dir, num_classes, n_epochs=60, patience=10):
 
         trainer.fit(model, train_loader, val_loader)
 
+       
         model_path = os.path.join(save_dir, f"best_model_fold_{fold+1}.pth")
-        trainer.save_checkpoint(model_path)
-        torch.save(model.state_dict(), model_path)
+        trainer.save_checkpoint(os.path.join(save_dir, f"checkpoint_fold_{fold+1}.ckpt"))
+        torch.save(model.model.state_dict(), os.path.join(save_dir, f"weights_fold_{fold+1}.pth"))
+
         print(f"Best model for fold {fold+1} saved at: {model_path}")
 
     print("Training complete for all folds.")
